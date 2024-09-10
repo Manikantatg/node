@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Path Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Graph Image</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="graphImage" name="graphImage" accept="image/*" required>
+            <button type="submit">Upload & Analyze</button>
+        </form>
+        
+        <!-- Buttons for displaying shortest and longest path -->
+        <div id="path-buttons" style="display: none;">  <!-- Initially hidden -->
+            <button id="showShortest">Show Shortest Path</button>
+            <button id="showLongest">Show Longest Path</button>
+        </div>
+
+        <!-- Section for displaying the results -->
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Handle form submission
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form from refreshing the page
+
+            const formData = new FormData();
+            const imageFile = document.getElementById('graphImage').files[0];
+
+            if (imageFile) {
+                formData.append('graphImage', imageFile);
+
+                // Send the image file to Flask server for analysis
+                fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('result').innerHTML = `<p>${data.error}</p>`;
+                    } else {
+                        // Store the results in data attributes for later use
+                        document.getElementById('result').setAttribute('data-short-path', JSON.stringify(data.shortPaths));
+                        document.getElementById('result').setAttribute('data-long-path', JSON.stringify(data.longPaths));
+                        document.getElementById('result').setAttribute('data-num-short', data.numShortPaths);
+                        document.getElementById('result').setAttribute('data-num-long', data.numLongPaths);
+
+                        // Display the buttons to view shortest or longest path
+                        document.getElementById('path-buttons').style.display = 'block';
+
+                        // Clear any previous result
+                        document.getElementById('result').innerHTML = '';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            } else {
+                alert("Please select a file.");
+            }
+        });
+
+        // Handle Shortest Path button click
+        document.getElementById('showShortest').addEventListener('click', function() {
+            const shortPaths = JSON.parse(document.getElementById('result').getAttribute('data-short-path'));
+            const numShort = document.getElementById('result').getAttribute('data-num-short');
+            document.getElementById('result').innerHTML = `
+                <p>Number of Short Paths: ${numShort}</p>
+                <p>Shortest Path: ${shortPaths.join(' -> ')}</p>
+            `;
+        });
+
+        // Handle Longest Path button click
+        document.getElementById('showLongest').addEventListener('click', function() {
+            const longPaths = JSON.parse(document.getElementById('result').getAttribute('data-long-path'));
+            const numLong = document.getElementById('result').getAttribute('data-num-long');
+            document.getElementById('result').innerHTML = `
+                <p>Number of Long Paths: ${numLong}</p>
+                <p>Longest Path: ${longPaths.join(' -> ')}</p>
+            `;
+        });
+    </script>
+</body>
+</html>
