@@ -4,85 +4,87 @@ python app.py<br>
 ctrl c to exit the task<br> 
 
 
-#include<stdlib.h>
 #include<stdio.h>
-#define MAX 6
-int stack[MAX],ele,num,top=-1;
-void push(int);
-int pop();
-void stakstatus();
-void display();
+#include<stdlib.h>
+struct term
+{
+    int row;
+    int col;
+    int value;
+};
+struct term a[100],b[100];
+void display(int value,struct term m[])
+{
+    int i;
+    printf("rows\tcolumns\tvalues\n");
+    for(i=0;i<=value;i++)
+    {
+        printf("%d\t%d\t%d\n",m[i].row,m[i].col,m[i].value);
+    }
+}
+void create()
+{
+    int i, row,col,n;
+    printf("Enter no. of rows, cols, values: ");
+    scanf("%d%d%d",&row,&col,&n);
+    a[0].row=row;
+    a[0].col=col;
+    a[0].value=n;
+    for(i=1;i<=n;i++)
+    {
+        scanf("%d%d%d",&a[i].row,&a[i].col,&a[i].value);
+    }
+    display(n,a);
+}
+void transpose()
+{
+    int i,j,k=1,row,col,n;
+    n=a[0].value;
+    b[0].row=a[0].col;
+    b[0].col=a[0].row;
+    b[0].value=n;
+    for(i=0;i<=a[0].col;i++)
+    {
+        for(j=1;j<=n;j++)
+        {
+            if(a[j].col==i)
+            {
+                b[k].row=a[j].col;
+                b[k].col=a[j].row;
+                b[k].value=a[j].value;
+                k++;
+            }
+        }
+    }
+    display(n,b);
+}
 int main()
 {
- int ch;
-while(1)
-{
-printf("\n1.push \n2.pop \n3.stack status \n4.display\n5.Exit\n Enter your choice:");
-scanf("%d",&ch);
-switch(ch)
-{
-case 1:
-printf("\n Enter element to push: ");
-scanf("%d", &ele);
-push(ele);
-break;
-case 2:
-ele = pop();
-printf("\n popped element from stack: %d",ele);
-break;
-case 3:
-stakstatus();
-break;
-case 4:
-display();
-break;
-case 5:
-exit(0);
-}
-}
-}
-void push(int ele)
-{
-if (top ==MAX - 1)// if top==max-1 stack is full...
-{
-printf("\n stack is overflow...\n"); 
-}
-else{
-stack[++top]= ele;//increment top and push element to stack
-}
-}
-int pop()
-{
-if (top ==-1)//if top=-1 stack is empty you cannot pop element
-{
- printf("\n stack is underflow! \n");
- }
-else
-{
-return stack[top--];//pop last element inserted from stack
-}
-}
-void stakstatus()
-{
-if(top == MAX -1)//check the condition to stack full or not 
-{
-printf("stack is full");
-}
- display();
-}
-void display()
-{
- int i;
-if (top ==-1)
-{
-printf("stack is empty!\n");
-}
-else
-{
-printf("stack else are \n");
-for (i=top;i>=0;i--)
-{
-printf("%d\n",stack[i]);
-}
-}
+    int ch;
+    while(1)
+    {
+        printf("\nMenu\n");
+        printf("1.Create a sparse Matrix\n");
+        printf("2.Transpose of a sparse Matrix\n");
+        printf("3.exit\n");
+        printf("Enter your choice: ");
+        scanf("%d",&ch);
+
+        switch (ch)
+        {
+        case 1:
+            create();
+            break;
+        case 2:
+            transpose();
+            break;
+        case 3:
+            exit(0);
+            break;
+        default:
+            printf("\nInvalid Option\n");
+            break;
+        }
+    }
+    return 0;
 }
