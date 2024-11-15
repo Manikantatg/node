@@ -3,88 +3,64 @@ pip install Flask networkx<br>
 python app.py<br>
 ctrl c to exit the task<br> 
 
+From here
 
-#include<stdio.h>
-#include<stdlib.h>
-struct term
-{
-    int row;
-    int col;
-    int value;
-};
-struct term a[100],b[100];
-void display(int value,struct term m[])
-{
-    int i;
-    printf("rows\tcolumns\tvalues\n");
-    for(i=0;i<=value;i++)
-    {
-        printf("%d\t%d\t%d\n",m[i].row,m[i].col,m[i].value);
-    }
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+#define MAX 100
+
+char stack[MAX];
+int top = -1;
+
+void push(char c) {
+    stack[++top] = c;
 }
-void create()
-{
-    int i, row,col,n;
-    printf("Enter no. of rows, cols, values: ");
-    scanf("%d%d%d",&row,&col,&n);
-    a[0].row=row;
-    a[0].col=col;
-    a[0].value=n;
-    for(i=1;i<=n;i++)
-    {
-        scanf("%d%d%d",&a[i].row,&a[i].col,&a[i].value);
-    }
-    display(n,a);
+
+char pop() {
+    return stack[top--];
 }
-void transpose()
-{
-    int i,j,k=1,row,col,n;
-    n=a[0].value;
-    b[0].row=a[0].col;
-    b[0].col=a[0].row;
-    b[0].value=n;
-    for(i=0;i<=a[0].col;i++)
-    {
-        for(j=1;j<=n;j++)
-        {
-            if(a[j].col==i)
-            {
-                b[k].row=a[j].col;
-                b[k].col=a[j].row;
-                b[k].value=a[j].value;
-                k++;
-            }
+
+int precedence(char c) {
+    if (c == '^') return 3;
+    if (c == '*' || c == '/') return 2;
+    if (c == '+' || c == '-') return 1;
+    return 0;
+}
+
+int isOperator(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
+}
+
+void infixToPostfix(char* infix, char* postfix) {
+    int i, j = 0;
+    for (i = 0; infix[i] != '\0'; i++) {
+        if (isalnum(infix[i])) {
+            postfix[j++] = infix[i];
+        } else if (infix[i] == '(') {
+            push(infix[i]);
+        } else if (infix[i] == ')') {
+            while (top != -1 && stack[top] != '(')
+                postfix[j++] = pop();
+            pop();
+        } else if (isOperator(infix[i])) {
+            while (top != -1 && precedence(stack[top]) >= precedence(infix[i]))
+                postfix[j++] = pop();
+            push(infix[i]);
         }
     }
-    display(n,b);
+    while (top != -1)
+        postfix[j++] = pop();
+    postfix[j] = '\0';
 }
-int main()
-{
-    int ch;
-    while(1)
-    {
-        printf("\nMenu\n");
-        printf("1.Create a sparse Matrix\n");
-        printf("2.Transpose of a sparse Matrix\n");
-        printf("3.exit\n");
-        printf("Enter your choice: ");
-        scanf("%d",&ch);
 
-        switch (ch)
-        {
-        case 1:
-            create();
-            break;
-        case 2:
-            transpose();
-            break;
-        case 3:
-            exit(0);
-            break;
-        default:
-            printf("\nInvalid Option\n");
-            break;
-        }
-    }
+int main() {
+    char infix[MAX], postfix[MAX];
+    printf("Enter infix expression: ");
+    scanf("%s", infix);
+    infixToPostfix(infix, postfix);
+    printf("Postfix expression: %s\n", postfix);
     return 0;
 }
